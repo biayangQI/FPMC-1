@@ -15,7 +15,7 @@ class FPMC():
         self.learn_rate = learn_rate
         self.regular = regular
 
-    @staticmethod
+    @staticmethod # 可以实例化类FPMC，餐后实例化调用， 也可以不实例化，直接调用， eg： FPMC.dump()
     def dump(fpmcObj, fname):
         pickle.dump(fpmcObj, open(fname, 'wb'))
 
@@ -67,6 +67,8 @@ class FPMC():
 
     def learn_epoch(self, tr_data, neg_batch_size):
         for iter_idx in range(len(tr_data)):
+            print('tr_data', tr_data)
+            exit()
             (u, i, b_tm1) = random.choice(tr_data)
             
             exclu_set = self.item_set - set([i])
@@ -121,3 +123,9 @@ class FPMC():
             return (acc_out, mrr_out)
         else:
             return None
+
+
+if __name__ == "__main__":
+
+    print('test')
+    FPMC.dump()

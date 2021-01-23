@@ -1,3 +1,11 @@
+'''
+Author: lqyang
+Date: 2021-01-22 16:13:23
+LastEditTime: 2021-01-23 23:53:47
+LastEditors: Please set LastEditors
+Description: In User Settings Edit
+FilePath: /FPMC-1/utils.py
+'''
 import csv, math
 import numpy as np
 
@@ -8,7 +16,16 @@ def sigmoid(x):
         return math.exp(x - np.logaddexp(x, 0))
 
 def load_data_from_dir(dirname):
-    fname_user_idxseq = dirname + '/' + 'idxseq.txt'
+    '''
+    description: 
+    param: 
+        dirname: dir, such as 'data/'
+    return:
+        data_list: list, [(user, label, [item_indexs0, item_index1, ...]]), ...]
+        user_set: set, {user_index, ...}
+        item_set: set, {item_index, ...}
+    '''
+    fname_user_idxseq = dirname + '/' + 'idxseq.txt'  # data format: [user index] [item index] ... [item index], the last [item index] as label
     fname_user_list = dirname + '/' + 'user_idx_list.txt'
     fname_item_list = dirname + '/' + 'item_idx_list.txt'
     user_set = load_idx_list_file(fname_user_list)
@@ -21,9 +38,8 @@ def load_data_from_dir(dirname):
             user = l[0]
             b_tm1 = list(set(l[1:-1]))
             label = l[-1]
-
             data_list.append((user, label, b_tm1))
-    
+
     return data_list, user_set, item_set    
 
 

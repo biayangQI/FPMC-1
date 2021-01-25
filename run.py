@@ -1,22 +1,21 @@
 '''
 Author: lqyang
 Date: 2021-01-22 16:13:23
-LastEditTime: 2021-01-22 17:20:11
-LastEditors: your name
+LastEditTime: 2021-01-25 14:54:51
+LastEditors: lqyang
 Description: In User Settings Edit
-FilePath: /FPMC-1/run.py
+FilePath: \session_related\FPMC-1\run.py
 '''
 import sys, os, pickle, argparse
 from random import shuffle
 from utils import *
-try:
-    from FPMC_numba import FPMC
-except ImportError:
-    from FPMC import FPMC
+from data2fpmc import load_data
+
+from FPMC import FPMC
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('input_dir',help='The directory of input', type=str, default='data/')
+    parser.add_argument('-d', '--dataset',help='dataset name, such as: tafeng_test/tafeng_0117', type=str, default='tafeng_test')
     parser.add_argument('-e', '--n_epoch', help='# of epoch', type=int, default=15)
     parser.add_argument('--n_neg', help='# of neg samples', type=int, default=10)
     parser.add_argument('-n', '--n_factor', help='dimension of factorization', type=int, default=32)
@@ -25,29 +24,22 @@ if __name__ == '__main__':
     args = parser.parse_args()
     print(args)
 
-    f_dir = args.input_dir
+    datasets_dir = os.path.join('datasets', args.dataset)
 
-    data_list, user_set, item_set = load_data_from_dir(f_dir) 
-    # data_list: list, [(user, label, [item_indexs0, item_index1, ...]]), ...]
-    # user_set: set, {user_index, ...}
+    tr_data, te_data, item_set = load_data(datasets_dir) 
+    # tr_data: list, [(label, [item_index0, item_index1, ...]]), ...]
+    # te_data: list, [(label, [item_index0, item_index1, ...]]), ...]
     # item_set: set, {item_index, ...}
 
-    # shuffle randomly
-    shuffle(data_list)
-    train_ratio = 0.8
-    split_idx = int(len(data_list) * train_ratio)
-    tr_data = data_list[:split_idx]
-    te_data = data_list[split_idx:]
 
-
-    fpmc = FPMC(n_user=max(user_set)+1, n_item=max(item_set)+1, 
+    fpmc = FPMC(n_item=max(item_set)+1, 
                 n_factor=args.n_factor, learn_rate=args.learn_rate, regular=args.regular)
-    fpmc.user_set = user_set
+
     fpmc.item_set = item_set
     fpmc.init_model()
 
     acc, mrr = fpmc.learnSBPR_FPMC(tr_data, te_data, n_epoch=args.n_epoch, 
-                                   neg_batch_size=args.n_neg, eval_per_epoch=False)
+                                   neg_batch_size=args.n_neg, eval_per_epoch=True)
 
     print ("Accuracy:%.2f MRR:%.2f" % (acc, mrr))
 

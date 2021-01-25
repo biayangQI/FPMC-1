@@ -4,18 +4,16 @@ import numpy as np
 from utils import *
 
 class FPMC():
-    def __init__(self, n_user, n_item, n_factor, learn_rate, regular):
-        self.user_set = set()
-        self.item_set = set()
+    def __init__(self, n_item, n_factor, learn_rate, regular):
 
-        self.n_user = n_user
+        self.item_set = set()
         self.n_item = n_item
 
         self.n_factor = n_factor
         self.learn_rate = learn_rate
         self.regular = regular
 
-    @staticmethod # 可以实例化类FPMC，餐后实例化调用， 也可以不实例化，直接调用， eg： FPMC.dump()
+    @staticmethod # 可以实例化类FPMC，然后实例化调用， 也可以不实例化，直接调用， eg： FPMC.dump()
     def dump(fpmcObj, fname):
         pickle.dump(fpmcObj, open(fname, 'wb'))
 
@@ -24,32 +22,32 @@ class FPMC():
         return pickle.load(open(fname, 'rb'))
 
     def init_model(self, std=0.01):
-        self.VUI = np.random.normal(0, std, size=(self.n_user, self.n_factor))
-        self.VIU = np.random.normal(0, std, size=(self.n_item, self.n_factor))
+        # self.VUI = np.random.normal(0, std, size=(self.n_user, self.n_factor))
+        # self.VIU = np.random.normal(0, std, size=(self.n_item, self.n_factor))
         self.VIL = np.random.normal(0, std, size=(self.n_item, self.n_factor))
         self.VLI = np.random.normal(0, std, size=(self.n_item, self.n_factor))
-        self.VUI_m_VIU = np.dot(self.VUI, self.VIU.T)
+        # self.VUI_m_VIU = np.dot(self.VUI, self.VIU.T)
         self.VIL_m_VLI = np.dot(self.VIL, self.VLI.T)
 
-    def compute_x(self, u, i, b_tm1):
+    def compute_x(self, i, b_tm1):
         acc_val = 0.0
         for l in b_tm1:
             acc_val += np.dot(self.VIL[i], self.VLI[l])
-        return (np.dot(self.VUI[u], self.VIU[i]) + (acc_val/len(b_tm1)))
+        return (acc_val/len(b_tm1))
 
-    def compute_x_batch(self, u, b_tm1):
-        former = self.VUI_m_VIU[u]
+    def compute_x_batch(self, b_tm1):
         latter = np.mean(self.VIL_m_VLI[:, b_tm1], axis=1).T
-        return (former + latter)
+        return latter
 
     def evaluation(self, data_list):
-        np.dot(self.VUI, self.VIU.T, out=self.VUI_m_VIU)
+        # np.dot(self.VUI, self.VIU.T, out=self.VUI_m_VIU)
         np.dot(self.VIL, self.VLI.T, out=self.VIL_m_VLI)
 
         correct_count = 0
         rr_list = []
-        for (u, i, b_tm1) in data_list:
-            scores = self.compute_x_batch(u, b_tm1)
+        for (i, b_tm1) in data_list:
+            scores = self.compute_x_batch(b_tm1)
+            
 
             if i == scores.argmax():
                 correct_count += 1
@@ -67,26 +65,24 @@ class FPMC():
 
     def learn_epoch(self, tr_data, neg_batch_size):
         for iter_idx in range(len(tr_data)):
-            print('tr_data', tr_data)
-            exit()
-            (u, i, b_tm1) = random.choice(tr_data)
+            (i, b_tm1) = random.choice(tr_data)
             
             exclu_set = self.item_set - set([i])
             j_list = random.sample(exclu_set, neg_batch_size)
             
-            z1 = self.compute_x(u, i, b_tm1)
+            z1 = self.compute_x(i, b_tm1)
             for j in j_list:
 
-                z2 = self.compute_x(u, j, b_tm1)
+                z2 = self.compute_x(j, b_tm1)
                 delta = 1 - sigmoid(z1 - z2)
 
-                VUI_update = self.learn_rate * (delta * (self.VIU[i] - self.VIU[j]) - self.regular * self.VUI[u])
-                VIUi_update = self.learn_rate * (delta * self.VUI[u] - self.regular * self.VIU[i])
-                VIUj_update = self.learn_rate * (-delta * self.VUI[u] - self.regular * self.VIU[j])
+                # VUI_update = self.learn_rate * (delta * (self.VIU[i] - self.VIU[j]) - self.regular * self.VUI[u])
+                # VIUi_update = self.learn_rate * (delta * self.VUI[u] - self.regular * self.VIU[i])
+                # VIUj_update = self.learn_rate * (-delta * self.VUI[u] - self.regular * self.VIU[j])
 
-                self.VUI[u] += VUI_update
-                self.VIU[i] += VIUi_update
-                self.VIU[j] += VIUj_update
+                # self.VUI[u] += VUI_update
+                # self.VIU[i] += VIUi_update
+                # self.VIU[j] += VIUj_update
 
                 eta = np.mean(self.VLI[b_tm1], axis=0)
                 VILi_update = self.learn_rate * (delta * eta - self.regular * self.VIL[i])
@@ -97,7 +93,7 @@ class FPMC():
                 self.VIL[j] += VILj_update
                 self.VLI[b_tm1] += VLI_update
 
-    def learnSBPR_FPMC(self, tr_data, te_data=None, n_epoch=10, neg_batch_size=10, eval_per_epoch=False):
+    def learnSBPR_FPMC(self, tr_data, te_data=None, n_epoch=10, neg_batch_size=10, eval_per_epoch=True):
         for epoch in range(n_epoch):
             self.learn_epoch(tr_data, neg_batch_size=neg_batch_size)
 
@@ -128,4 +124,3 @@ class FPMC():
 if __name__ == "__main__":
 
     print('test')
-    FPMC.dump()

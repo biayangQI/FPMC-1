@@ -2,12 +2,13 @@
 Author: lqyang
 Date: 2021-01-25 13:30:45
 LastEditors: lqyang
-LastEditTime: 2021-01-25 13:55:35
+LastEditTime: 2021-01-25 14:41:21
 FilePath: \session_related\FPMC-1\data2fpmc.py
 Dec: 
     Convert to FPMC data format
     Namely:
-        # data_list: list, [(label, [item_index0, item_index1, ...]]), ...]
+        # tra_data_list: list, [(label, [item_index0, item_index1, ...]]), ...]
+        # tes_data_list: list, [(label, [item_index0, item_index1, ...]]), ...]
         # item_set: set, {item_index, ...}
 '''
 
@@ -44,14 +45,15 @@ def load_data(dataset_dir):
         num_items = session_info["num_of_item[not include 0]"] + 1
     except:
         num_items = session_info["num_of_item"] + 1
-    item_set = set(np.arange(num_items)
+    item_set = set(np.arange(num_items))
 
     return tra_data_list, tes_data_list, item_set
 
+    
 if __name__ == "__main__":
     dataset_dir = os.path.join("datasets", "tafeng_test")
     print(dataset_dir)
-    load_data(dataset_dir)
+    tra_data_list, tes_data_list, item_set = load_data(dataset_dir)
 
     
 

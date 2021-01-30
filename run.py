@@ -1,10 +1,10 @@
 '''
 Author: lqyang
 Date: 2021-01-22 16:13:23
-LastEditTime: 2021-01-25 17:00:32
+LastEditTime: 2021-01-26 16:31:13
 LastEditors: lqyang
 Description: In User Settings Edit
-FilePath: \session_related\FPMC-1\run.py
+FilePath: \FPMC-1\run.py
 '''
 import sys, os, pickle, argparse
 from random import shuffle
@@ -12,12 +12,14 @@ from utils import *
 from data2fpmc import load_data
 from utils_add import *
 from FPMC import FPMC
+from config import args
 
 
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"]  =  "TRUE"
 
 if __name__ == '__main__':
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--dataset',help='dataset name, such as: tafeng_test/tafeng_0117', type=str, default='tafeng_test')
     parser.add_argument('-e', '--n_epoch', help='# of epoch', type=int, default=15)
@@ -28,6 +30,7 @@ if __name__ == '__main__':
     parser.add_argument('--log', '--log_path_txt', help='log_path_txt', type=str, default="")
     args = parser.parse_args()
     print(args)
+    """
 
     time_path = time.strftime("%y%m%d-%H%M%S", time.localtime(time.time()))
     log_dir_train = os.path.join('./visual', args.dataset, 'DemandRS',
@@ -43,6 +46,7 @@ if __name__ == '__main__':
     
     seed_torch(args.log_path_txt, seed=2021)
     datasets_dir = os.path.join('datasets', args.dataset)
+    args.parse()
 
     tr_data, te_data, item_set = load_data(datasets_dir) 
     # tr_data: list, [(label, [item_index0, item_index1, ...]]), ...]

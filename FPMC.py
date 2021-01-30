@@ -115,6 +115,17 @@ class FPMC():
     
 
     def learnSBPR_FPMC(self,log_path_txt, tr_data, te_data=None, n_epoch=10, neg_batch_size=10, eval_per_epoch=True, Ks=[10,20,50], Ks_auc=[100]):
+        
+        best_result_recall = [0]*len(Ks)
+        best_result_mrr = [0] * len(Ks)
+        best_result_ndcg = [0] * len(Ks)
+        best_result_auc = [0] * len(Ks_auc)
+
+        best_epoch_auc = [0] * len(Ks_auc)
+        best_epoch_ndcg = [0] * len(Ks)
+        best_epoch_recall = [0]*len(Ks)
+        best_epoch_mrr = [0]*len(Ks)
+        
         for epoch in range(n_epoch):
             self.learn_epoch(tr_data, neg_batch_size=neg_batch_size)
 
@@ -123,7 +134,7 @@ class FPMC():
                 recall, mrr, ndcg, auc = evaluate(scores=scores, ground_truth=ground_truth, Ks=Ks, Ks_auc=Ks_auc)
 
                 # print train data result
-                cprint(log_path_txt,f'Current Train Data Result Epoch {epoch}:')
+                file_writer(log_path_txt,f'Current Train Data Result Epoch {epoch}:')
                 print_result(log_path_txt, 'Recall', recall,Ks)
                 print_result(log_path_txt, 'MRR', mrr,Ks)
                 print_result(log_path_txt, 'NDCG', ndcg, Ks)
@@ -132,16 +143,6 @@ class FPMC():
             # start test
             scores, ground_truth = self.predict(te_data)
             recall, mrr, ndcg, auc = evaluate(scores=scores, ground_truth=ground_truth, Ks=Ks, Ks_auc=Ks_auc)
-
-            best_result_recall = [0]*len(Ks)
-            best_result_mrr = [0] * len(Ks)
-            best_result_ndcg = [0] * len(Ks)
-            best_result_auc = [0] * len(Ks_auc)
-
-            best_epoch_auc = [0] * len(Ks_auc)
-            best_epoch_ndcg = [0] * len(Ks)
-            best_epoch_recall = [0]*len(Ks)
-            best_epoch_mrr = [0]*len(Ks)
 
             for i, topk in enumerate(Ks):
                 if recall[i] >= best_result_recall[i]:

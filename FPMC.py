@@ -134,7 +134,7 @@ class FPMC():
                 recall, mrr, ndcg, auc = evaluate(scores=scores, ground_truth=ground_truth, Ks=Ks, Ks_auc=Ks_auc)
 
                 # print train data result
-                file_writer(log_path_txt,f'Current Train Data Result Epoch {epoch}:')
+                file_write(log_path_txt,f'Current Train Data Result Epoch {epoch}:')
                 print_result(log_path_txt, 'Recall', recall,Ks)
                 print_result(log_path_txt, 'MRR', mrr,Ks)
                 print_result(log_path_txt, 'NDCG', ndcg, Ks)

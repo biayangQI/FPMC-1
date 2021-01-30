@@ -64,7 +64,7 @@ if __name__ == '__main__':
     Ks_auc = [50,100,200,500]
 
     start = time.time()
-    acc, mrr = fpmc.learnSBPR_FPMC(args.log_path_txt, tr_data, te_data, n_epoch=args.n_epoch, 
+    fpmc.learnSBPR_FPMC(args.log_path_txt, tr_data, te_data, n_epoch=args.n_epoch, 
                                    neg_batch_size=args.n_neg, eval_per_epoch=True, Ks=Ks, Ks_auc=Ks_auc)
     file_write(args.log_path_txt, '-------------------------------------------------------')
     end = time.time()

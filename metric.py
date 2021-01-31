@@ -10,6 +10,12 @@ from DemandRS
 import torch
 import numpy as np
 
+def multiply_list(a:list)->list:
+    """
+    Multiply each element in the list by 100
+    """
+    return [i*100 for i in a]
+
 def evaluate(scores, ground_truth, Ks=[10,20,50], Ks_auc=[50,100,200,500]):
     '''
     Evaluates the model using Recall@K, MRR@K scores. For FPMC method, one batch is the whole data.
@@ -21,7 +27,7 @@ def evaluate(scores, ground_truth, Ks=[10,20,50], Ks_auc=[50,100,200,500]):
     metrics, dict, {'recall': [recall@10, recall@20, recall@50, recall@100], 'mrr': [mrr@10, mrr@20, mrr@50, mrr@100]}
     '''
     metrics = {}
-    metrics['auc'] = get_auc(scores,ground_truth,Ks_auc)
+    metrics['auc'] = multiply_list(get_auc(scores,ground_truth,Ks_auc))
     recalls, mrrs, ndcgs = [], [], []
     for k in Ks:
         _, indices = torch.topk(scores, k=k, dim=-1)  # return（values=tensor[,...,], indices=tensor[,...,]）
@@ -36,9 +42,9 @@ def evaluate(scores, ground_truth, Ks=[10,20,50], Ks_auc=[50,100,200,500]):
         ndcg = NDCG_k(indices,targets)
         ndcgs.append(ndcg)
 
-    metrics['recall'] = recalls
-    metrics['mrr'] = mrrs
-    metrics['ndcg'] = ndcgs
+    metrics['recall'] = multiply_list(recalls)
+    metrics['mrr'] = multiply_list(mrrs)
+    metrics['ndcg'] = multiply_list(ndcgs)
     
     return metrics['recall'], metrics['mrr'], metrics['ndcg'], metrics['auc']
 

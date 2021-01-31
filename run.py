@@ -71,8 +71,6 @@ if __name__ == '__main__':
     file_write(log_path_txt, f"Run time: {(end - start) / 60.0}min")
 
 
-    
-
 
 
 
